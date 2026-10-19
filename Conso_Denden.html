@@ -1,44 +1,152 @@
+
 <!DOCTYPE html>
-<html lang="fr"> <head>
-<meta charset="UTF-8">
-<title>Ma page Consommation</title>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-  <script>async function chargerDonneesExcel() {
-    const urlExcel =
-        "https://raw.githubusercontent.com/FarahGuirat/MP1DS2026/main/Consommation-STEG-DenDen.xlsx";
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    try {
-        const reponse = await fetch(urlExcel);
+    <title>Consommation STEG - Denden</title>
 
-        if (!reponse.ok) {
-            throw new Error("Impossible de charger le fichier Excel.");
+    <!-- Bibliothèque pour lire les fichiers Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background-color: #f5f7fa;
         }
 
-        const contenu = await reponse.arrayBuffer();
-        const classeur = XLSX.read(contenu, { type: "array" });
+        h1 {
+            color: #176b45;
+        }
 
-        console.log("Feuilles Excel :", classeur.SheetNames);
+        #message {
+            margin: 15px 0;
+        }
 
-        const nomFeuille = classeur.SheetNames[0];
-        const feuille = classeur.Sheets[nomFeuille];
+        .table-container {
+            overflow-x: auto;
+        }
 
-        const donnees = XLSX.utils.sheet_to_json(feuille, {
-            defval: null
-        });
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
 
-        console.log("Données Excel :", donnees);
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
 
-        return donnees;
+        th {
+            background-color: #176b45;
+            color: white;
+        }
 
-    } catch (erreur) {
-        console.error("Erreur :", erreur);
-        return [];
-    }
-}
-  chargerDonneesExcel().then(donnees => {
-    console.log("Nombre de lignes :", donnees.length);
-    console.table(donnees);
-});
-  </script>
-</head> <body> <p>consommation Denden </p>
-</body> </html>
+        tr:nth-child(even) {
+            background-color: #f0f5f2;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Consommation STEG - Denden</h1>
+
+    <p>Les données sont chargées depuis le fichier Excel hébergé sur GitHub.</p>
+
+    <p id="message">Chargement des données...</p>
+
+    <div class="table-container">
+        <table id="tableau">
+            <thead></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        async function chargerDonneesExcel() {
+            const urlExcel =
+                "https://raw.githubusercontent.com/FarahGuirat/MP1DS2026/main/Consommation-STEG-DenDen.xlsx";
+
+            const message = document.getElementById("message");
+
+            try {
+                const reponse = await fetch(urlExcel);
+
+                if (!reponse.ok) {
+                    throw new Error("Erreur HTTP : " + reponse.status);
+                }
+
+                const contenu = await reponse.arrayBuffer();
+
+                const classeur = XLSX.read(contenu, {
+                    type: "array"
+                });
+
+                const nomFeuille = classeur.SheetNames[0];
+                const feuille = classeur.Sheets[nomFeuille];
+
+                const donnees = XLSX.utils.sheet_to_json(feuille, {
+                    header: 1,
+                    defval: ""
+                });
+
+                if (donnees.length === 0) {
+                    message.textContent = "Le fichier Excel est vide.";
+                    return;
+                }
+
+                // Première ligne : noms des colonnes
+                const entetes = donnees[0];
+                const lignes = donnees.slice(1);
+
+                const thead = document.querySelector("#tableau thead");
+                const tbody = document.querySelector("#tableau tbody");
+
+                // Afficher les en-têtes
+                const ligneEntetes = document.createElement("tr");
+
+                entetes.forEach(entete => {
+                    const th = document.createElement("th");
+                    th.textContent = entete;
+                    ligneEntetes.appendChild(th);
+                });
+
+                thead.appendChild(ligneEntetes);
+
+                // Afficher les données
+                lignes.forEach(ligne => {
+                    const tr = document.createElement("tr");
+
+                    entetes.forEach((_, index) => {
+                        const td = document.createElement("td");
+                        td.textContent = ligne[index] ?? "";
+                        tr.appendChild(td);
+                    });
+
+                    tbody.appendChild(tr);
+                });
+
+                message.textContent =
+                    "Chargement réussi : " + lignes.length + " lignes affichées.";
+
+                console.log("Feuille utilisée :", nomFeuille);
+                console.log("Données Excel :", donnees);
+
+            } catch (erreur) {
+                console.error("Erreur de chargement :", erreur);
+
+                message.textContent =
+                    "Impossible de charger le fichier Excel. Vérifie le lien GitHub et la console du navigateur.";
+            }
+        }
+
+        chargerDonneesExcel();
+    </script>
+
+</body>
+</html>
