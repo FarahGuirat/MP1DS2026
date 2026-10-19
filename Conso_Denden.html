@@ -2,5 +2,43 @@
 <html lang="fr"> <head>
 <meta charset="UTF-8">
 <title>Ma page Consommation</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script>async function chargerDonneesExcel() {
+    const urlExcel =
+        "https://raw.githubusercontent.com/FarahGuirat/MP1DS2026/main/Consommation-STEG-DenDen.xlsx";
+
+    try {
+        const reponse = await fetch(urlExcel);
+
+        if (!reponse.ok) {
+            throw new Error("Impossible de charger le fichier Excel.");
+        }
+
+        const contenu = await reponse.arrayBuffer();
+        const classeur = XLSX.read(contenu, { type: "array" });
+
+        console.log("Feuilles Excel :", classeur.SheetNames);
+
+        const nomFeuille = classeur.SheetNames[0];
+        const feuille = classeur.Sheets[nomFeuille];
+
+        const donnees = XLSX.utils.sheet_to_json(feuille, {
+            defval: null
+        });
+
+        console.log("Données Excel :", donnees);
+
+        return donnees;
+
+    } catch (erreur) {
+        console.error("Erreur :", erreur);
+        return [];
+    }
+}
+  chargerDonneesExcel().then(donnees => {
+    console.log("Nombre de lignes :", donnees.length);
+    console.table(donnees);
+});
+  </script>
 </head> <body> <p>consommation Denden </p>
 </body> </html>
