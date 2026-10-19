@@ -137,12 +137,12 @@
                 console.log("Feuille utilisée :", nomFeuille);
                 console.log("Données Excel :", donnees);
 
-            } catch (erreur) {
-                console.error("Erreur de chargement :", erreur);
+            }  catch (erreur) {
+    console.error("Erreur de chargement :", erreur);
 
-                message.textContent =
-                    "Impossible de charger le fichier Excel. Vérifie le lien GitHub et la console du navigateur.";
-            }
+    message.textContent =
+        "Erreur : " + erreur.message;
+        }
         }
 
         chargerDonneesExcel();
